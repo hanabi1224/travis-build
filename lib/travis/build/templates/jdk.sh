@@ -43,7 +43,7 @@ travis_setup_java() {
   jdkpath="$(travis_find_jdk_path)"
   if [[ -z "$jdkpath" ]]; then
     travis_install_jdk <%= jdk %>
-  elif [[ -e "$jdkpath/.jinfo" ]] && declare -f jdk_switcher; then
+  elif [[ -f "${jdkpath%/*}/.${jdkpath##*/}.jinfo" ]] && declare -f jdk_switcher; then
     travis_cmd 'jdk_switcher use <%= jdk %>' --echo --assert
     travis_remove_from_path "$JAVA_HOME/bin"
     unset JAVA_HOME
