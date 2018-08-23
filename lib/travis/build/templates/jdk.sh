@@ -41,6 +41,7 @@ travis_install_jdk() {
 travis_setup_java() {
   local jdkpath
   jdkpath="$(travis_find_jdk_path)"
+  echo debug: "${jdkpath%/*}/.${jdkpath##*/}.jinfo" $([[ -f "${jdkpath%/*}/.${jdkpath##*/}.jinfo" ]] && echo exists || echo does not exist)
   if [[ -z "$jdkpath" ]]; then
     travis_install_jdk <%= jdk %>
   elif [[ -f "${jdkpath%/*}/.${jdkpath##*/}.jinfo" ]] && declare -f jdk_switcher; then
