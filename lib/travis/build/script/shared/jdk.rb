@@ -67,24 +67,28 @@ module Travis
                      cache_dir: cache_dir)
           end
 
-          def paths
-            [ '/usr/lib/jvm', '/usr/local/lib/jvm' ]
+          def jdk_glob(jdk)
+            vendor, version = jdk_info(jdk)
+            apt_glob = "/usr/lib/jvm/java-1.#{version}.*#{vendor}*"
+            installjdk_glob = "/usr*/local/lib/jvm/#{jdk}"
+            "#{apt_glob} #{installjdk_glob}"
           end
 
-          def jdk_glob(jdk)
-            "{#{paths.join(',')}}/#{jdk}*"
+          def jdk_info(jdk)
+            m = jdk.match(/(?<vendor>[a-z]+)-?(?<version>.+)?/)
+            [ m[:vendor], m[:version] ]
           end
 
           def install_jdk_args(jdk)
-            m = jdk.match(/(?<vendor>[a-z]+)-?(?<version>.+)?/)
-            if m[:vendor].start_with? 'oracle'
+            vendor, version = jdk_info(jdk)
+            if vendor.start_with? 'oracle'
               license = 'BCL'
-            elsif m[:vendor].start_with? 'openjdk'
+            elsif vendor.start_with? 'openjdk'
               license = 'GPL'
             else
               return false
             end
-            "--feature #{m[:version]} --license #{license}"
+            "--feature #{version} --license #{license}"
           end
 
           def cache_dir
