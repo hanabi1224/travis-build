@@ -70,14 +70,23 @@ module Travis
 
           def jdk_glob(jdk)
             vendor, version = jdk_info(jdk)
-            apt_glob = "/usr/lib/jvm/java-1.#{version}.*#{vendor}*"
+            if vendor == 'openjdk'
+              apt_glob = "/usr/lib/jvm/java-1.#{version}.*openjdk*"
+            elsif vendor == 'oracle'
+              apt_glob = "/usr*/lib/jvm/java-#{version}-oracle"
+            end
             installjdk_glob = "/usr*/local/lib/jvm/#{jdk}"
             "#{apt_glob} #{installjdk_glob}"
           end
 
           def jdk_info(jdk)
             m = jdk.match(/(?<vendor>[a-z]+)-?(?<version>.+)?/)
-            [ m[:vendor], m[:version] ]
+            if m[:vendor]. start_with? 'oracle'
+              vendor = 'oracle'
+            elsif m[:vendor].start_with? 'openjdk'
+              vendor = 'openjdk'
+            end
+            [ vendor, m[:version] ]
           end
 
           def jinfo_file(jdk)
@@ -91,9 +100,9 @@ module Travis
 
           def install_jdk_args(jdk)
             vendor, version = jdk_info(jdk)
-            if vendor.start_with? 'oracle'
+            if vendor == 'oracle'
               license = 'BCL'
-            elsif vendor.start_with? 'openjdk'
+            elsif vendor == 'openjdk'
               license = 'GPL'
             else
               return false
