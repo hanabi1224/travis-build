@@ -62,6 +62,7 @@ module Travis
             template('jdk.sh',
                      jdk: jdk,
                      jdk_glob: jdk_glob(jdk),
+                     jinfo_file: jinfo_file(jdk),
                      app_host: app_host,
                      args: install_jdk_args(jdk),
                      cache_dir: cache_dir)
@@ -77,6 +78,15 @@ module Travis
           def jdk_info(jdk)
             m = jdk.match(/(?<vendor>[a-z]+)-?(?<version>.+)?/)
             [ m[:vendor], m[:version] ]
+          end
+
+          def jinfo_file(jdk)
+            vendor, version = jdk_info(jdk)
+            if vendor == 'oracle'
+              ".java-#{version}-#{vendor}.jinfo"
+            elsif vendor == 'openjdk'
+                ".java-1.#{version}.*-#{vendor}-*.jinfo"
+            end
           end
 
           def install_jdk_args(jdk)
